@@ -48,14 +48,17 @@ export function WhatsappCaptureCard() {
               WhatsApp number
             </label>
             <PhoneInput
-              defaultCountry="in"
+              country={country}
               value={phone}
               onChange={(phone, meta) => {
                 setPhone(phone)
-                if (meta.country) {
+                // Only update country if user explicitly changed it via dropdown
+                if (meta.country && meta.country.iso2 !== country) {
                   setCountry(meta.country.iso2)
                 }
               }}
+              disableCountryGuess={true}
+              forceDialCode={true}
               inputClassName="coss-input"
               countrySelectorStyleProps={{
                 buttonClassName: "country-selector-button"

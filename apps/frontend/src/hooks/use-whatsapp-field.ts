@@ -30,9 +30,9 @@ export function useWhatsappField(options?: UseWhatsappFieldOptions): WhatsappFie
 
   const endpoint = options?.endpoint ?? import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
 
-  // Validate phone number using libphonenumber-js
-  const isValid = phone ? isValidPhoneNumber(phone) : false
-  const normalizedValue = phone && isValid ? parsePhoneNumber(phone)?.formatInternational() || phone : phone
+  // Validate phone number using libphonenumber-js with selected country
+  const isValid = phone ? isValidPhoneNumber(phone, country.toUpperCase() as any) : false
+  const normalizedValue = phone && isValid ? parsePhoneNumber(phone, country.toUpperCase() as any)?.formatInternational() || phone : phone
 
   useEffect(() => {
     if (!phone) {
@@ -56,8 +56,8 @@ export function useWhatsappField(options?: UseWhatsappFieldOptions): WhatsappFie
       return
     }
 
-    // Get E.164 format for backend storage
-    const parsedPhone = parsePhoneNumber(phone)
+    // Get E.164 format for backend storage, validating against selected country
+    const parsedPhone = parsePhoneNumber(phone, country.toUpperCase() as any)
     const e164Number = parsedPhone?.number || phone
 
     if (e164Number === lastSyncedValueRef.current) {
@@ -97,7 +97,7 @@ export function useWhatsappField(options?: UseWhatsappFieldOptions): WhatsappFie
     sync()
 
     return () => controller.abort()
-  }, [endpoint, phone, isValid])
+  }, [endpoint, phone, isValid, country])
 
   return {
     phone,
