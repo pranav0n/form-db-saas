@@ -2,7 +2,7 @@ import { Router, type Request, type Response } from 'express'
 import type { WhatsappSubmission } from '@saas/shared'
 import { validateWhatsappValue } from '@saas/shared'
 
-const whatsappRouter = Router()
+const whatsappRouter: Router = Router()
 const recentSubmissions: WhatsappSubmission[] = []
 const MAX_SUBMISSIONS = 100
 
