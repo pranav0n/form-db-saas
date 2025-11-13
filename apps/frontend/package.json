@@ -10,6 +10,7 @@
     "lint": "eslint . --ext ts,tsx"
   },
   "dependencies": {
+    "libphonenumber-js": "^1.12.26",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-international-phone": "^4.6.0",

@@ -1,6 +1,6 @@
 import { Router, type Request, type Response } from 'express'
+import { isValidPhoneNumber, parsePhoneNumber } from 'libphonenumber-js'
 import type { WhatsappSubmission } from '@saas/shared'
-import { validateWhatsappValue } from '@saas/shared'
 
 const whatsappRouter: Router = Router()
 const recentSubmissions: WhatsappSubmission[] = []
@@ -8,17 +8,20 @@ const MAX_SUBMISSIONS = 100
 
 whatsappRouter.post('/', (req: Request, res: Response) => {
   const candidate = typeof req.body?.number === 'string' ? req.body.number : ''
-  const validation = validateWhatsappValue(candidate)
 
-  if (!validation.isValid || !validation.formattedValue) {
+  if (!candidate || !isValidPhoneNumber(candidate)) {
     return res.status(400).json({
       status: 'invalid',
-      issue: validation.issue ?? 'Invalid WhatsApp number.'
+      issue: 'Invalid phone number.'
     })
   }
 
+  // Parse and normalize to E.164 format
+  const parsedPhone = parsePhoneNumber(candidate)
+  const e164Number = parsedPhone?.number || candidate
+
   const submission: WhatsappSubmission = {
-    number: validation.formattedValue,
+    number: e164Number,
     capturedAt: new Date().toISOString(),
     source: typeof req.body?.source === 'string' ? req.body.source : 'web'
   }

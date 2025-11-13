@@ -1,9 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import {
-  formatWhatsappValue,
-  validateWhatsappValue,
-  type WhatsappSyncStatus
-} from '@saas/shared'
+import { useEffect, useRef, useState } from 'react'
+import { parsePhoneNumber, isValidPhoneNumber } from 'libphonenumber-js'
+import type { WhatsappSyncStatus } from '@saas/shared'
 
 interface UseWhatsappFieldOptions {
   endpoint?: string
@@ -31,12 +28,11 @@ export function useWhatsappField(options?: UseWhatsappFieldOptions): WhatsappFie
   const [lastStoredAt, setLastStoredAt] = useState<string>()
   const lastSyncedValueRef = useRef<string>('')
 
-  const endpoint = useMemo(() => {
-    return options?.endpoint ?? import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
-  }, [options?.endpoint])
+  const endpoint = options?.endpoint ?? import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
 
-  const validation = useMemo(() => validateWhatsappValue(phone), [phone])
-  const normalizedValue = useMemo(() => formatWhatsappValue(phone), [phone])
+  // Validate phone number using libphonenumber-js
+  const isValid = phone ? isValidPhoneNumber(phone) : false
+  const normalizedValue = phone && isValid ? parsePhoneNumber(phone)?.formatInternational() || phone : phone
 
   useEffect(() => {
     if (!phone) {
@@ -45,27 +41,31 @@ export function useWhatsappField(options?: UseWhatsappFieldOptions): WhatsappFie
       return
     }
 
-    if (!validation.isValid) {
+    if (!isValid) {
       setStatus('invalid')
-      setHelperMessage(validation.issue ?? 'Invalid WhatsApp number.')
+      setHelperMessage('Invalid phone number for selected country.')
       return
     }
 
     setStatus('valid')
     setHelperMessage('Looks good—syncing now.')
-  }, [phone, validation.isValid, validation.issue])
+  }, [phone, isValid])
 
   useEffect(() => {
-    if (!validation.isValid || !validation.formattedValue) {
+    if (!isValid || !phone) {
       return
     }
 
-    if (validation.formattedValue === lastSyncedValueRef.current) {
+    // Get E.164 format for backend storage
+    const parsedPhone = parsePhoneNumber(phone)
+    const e164Number = parsedPhone?.number || phone
+
+    if (e164Number === lastSyncedValueRef.current) {
       return
     }
 
     setStatus('syncing')
-    queueMicrotask(() => persistLocally(validation.formattedValue))
+    queueMicrotask(() => persistLocally(e164Number))
 
     const controller = new AbortController()
 
@@ -75,13 +75,13 @@ export function useWhatsappField(options?: UseWhatsappFieldOptions): WhatsappFie
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            number: validation.formattedValue,
+            number: e164Number,
             source: 'coss-ui'
           }),
           signal: controller.signal
         })
 
-        lastSyncedValueRef.current = validation.formattedValue
+        lastSyncedValueRef.current = e164Number
         const timestamp = new Date().toISOString()
         setLastStoredAt(timestamp)
         setStatus('synced')
@@ -97,7 +97,7 @@ export function useWhatsappField(options?: UseWhatsappFieldOptions): WhatsappFie
     sync()
 
     return () => controller.abort()
-  }, [endpoint, validation.formattedValue, validation.isValid])
+  }, [endpoint, phone, isValid])
 
   return {
     phone,
