@@ -51,13 +51,15 @@ Render runs each folder as an independent web service. Create two services—`fr
    - **Name**: `saas-backend` (or your choice)
    - **Root Directory**: `apps/backend`
    - **Environment**: `Node`
-   - **Build Command**: `pnpm install --no-frozen-lockfile && pnpm --filter @saas/backend build`
+   - **Build Command**: `pnpm install --no-frozen-lockfile`
    - **Start Command**: `pnpm --filter @saas/backend start`
 3. **Environment Variables** (add in Render dashboard):
    - `NODE_ENV=production`
    - Render auto-injects `PORT`; the Express server already respects it
 4. After deployment, confirm the health endpoint at `/health` returns `{ "status": "ok" }`.
 5. **Copy the backend public URL** (e.g., `https://saas-backend.onrender.com`)
+
+**Note**: Backend uses `tsx` to run TypeScript directly in production (no build step needed). This simplifies deployment and handles path aliases automatically.
 
 ### Frontend service
 
