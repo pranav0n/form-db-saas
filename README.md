@@ -81,7 +81,10 @@ Railway automatically detects and deploys each service. Deploy both `frontend` a
 ### Current Deployment
 
 **Frontend**: https://saasfrontend-production-4faf.up.railway.app/
-**Backend**: Set `VITE_API_URL` to your backend Railway URL in the frontend service environment variables
+**Backend**: https://saasbackend-production-5092.up.railway.app/
+
+**Frontend Environment Variable (set in Railway dashboard)**:
+- `VITE_API_URL=https://saasbackend-production-5092.up.railway.app`
 
 ### End-to-End Testing
 
@@ -89,13 +92,13 @@ Once both services are deployed on Railway:
 
 1. **Test Backend Health**
    ```bash
-   curl https://<your-backend-url>.up.railway.app/health
+   curl https://saasbackend-production-5092.up.railway.app/health
    # Expected: {"status":"ok"}
    ```
 
 2. **Test WhatsApp Endpoint**
    ```bash
-   curl -X POST https://<your-backend-url>.up.railway.app/whatsapp \
+   curl -X POST https://saasbackend-production-5092.up.railway.app/whatsapp \
      -H "Content-Type: application/json" \
      -d '{"number": "+919876543210", "source": "test"}'
    # Expected: {"status":"accepted","submission":{...}}
@@ -110,7 +113,7 @@ Once both services are deployed on Railway:
 4. **Verify End-to-End Flow**
    ```bash
    # After entering a number in the UI, check it was stored:
-   curl https://<your-backend-url>.up.railway.app/whatsapp/latest
+   curl https://saasbackend-production-5092.up.railway.app/whatsapp/latest
    # Expected: {"status":"ok","submission":{"number":"+...", ...}}
    ```
 
