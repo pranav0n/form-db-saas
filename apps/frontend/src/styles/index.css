@@ -16,40 +16,8 @@
 
 @layer components {
   .coss-input {
-    @apply w-full rounded-3xl border-2 border-coss-cloud/30 bg-white/80 px-6 py-4 text-lg font-semibold text-coss-ink shadow-inner outline-none transition-all duration-150 ease-out placeholder:text-slate-400 focus:border-coss-mint focus:bg-white focus:shadow-[0_0_0_3px_rgba(46,232,166,0.25)];
+    @apply w-full rounded-3xl border-2 border-coss-cloud/30 bg-white/80 px-6 py-4 text-lg font-semibold text-coss-ink shadow-inner outline-none transition-all duration-150 ease-out placeholder:text-slate-400/50 placeholder:font-normal focus:border-coss-mint focus:bg-white focus:shadow-[0_0_0_3px_rgba(46,232,166,0.25)];
   }
 
-  /* React International Phone custom styles */
-  .react-international-phone-input-container {
-    @apply w-full;
-  }
-
-  .react-international-phone-input-container .react-international-phone-input {
-    @apply w-full rounded-3xl border-2 border-coss-cloud/30 bg-white/80 px-6 py-4 pl-20 text-lg font-semibold text-coss-ink shadow-inner outline-none transition-all duration-150 ease-out placeholder:text-slate-400 focus:border-coss-mint focus:bg-white focus:shadow-[0_0_0_3px_rgba(46,232,166,0.25)];
-  }
-
-  .react-international-phone-country-selector-button {
-    @apply absolute left-3 top-1/2 -translate-y-1/2 rounded-2xl border-2 border-coss-cloud/20 bg-white/60 px-3 py-2 transition-all hover:border-coss-mint hover:bg-white;
-  }
-
-  .react-international-phone-country-selector-button__button-content {
-    @apply flex items-center gap-2;
-  }
-
-  .react-international-phone-country-selector-button__flag-emoji {
-    @apply text-xl;
-  }
-
-  .react-international-phone-country-selector-dropdown {
-    @apply mt-2 max-h-64 overflow-auto rounded-3xl border-2 border-coss-cloud/30 bg-white shadow-2xl;
-  }
-
-  .react-international-phone-country-selector-dropdown__list-item {
-    @apply cursor-pointer px-4 py-3 transition-colors hover:bg-coss-mint/10;
-  }
-
-  .react-international-phone-country-selector-dropdown__list-item--selected {
-    @apply bg-coss-mint/20 font-semibold;
-  }
 }
 

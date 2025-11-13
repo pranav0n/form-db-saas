@@ -1,5 +1,3 @@
-import { PhoneInput } from 'react-international-phone'
-import 'react-international-phone/style.css'
 import { useWhatsappField } from '../hooks/use-whatsapp-field'
 
 const statusCopy = {
@@ -12,7 +10,7 @@ const statusCopy = {
 } as const
 
 export function WhatsappCaptureCard() {
-  const { phone, setPhone, country, setCountry, helperMessage, status, normalizedValue, lastStoredAt } = useWhatsappField({ defaultCountry: 'in' })
+  const { phone, setPhone, helperMessage, status, normalizedValue, lastStoredAt } = useWhatsappField()
   const copy = statusCopy[status]
 
   return (
@@ -47,24 +45,16 @@ export function WhatsappCaptureCard() {
             <label htmlFor="whatsapp" className="text-sm font-semibold uppercase tracking-wider text-slate-500">
               WhatsApp number
             </label>
-            <PhoneInput
-              country={country}
+            <input
+              id="whatsapp"
+              type="tel"
               value={phone}
-              onChange={(phone, meta) => {
-                setPhone(phone)
-                // Only update country if user explicitly changed it via dropdown
-                if (meta.country && meta.country.iso2 !== country) {
-                  setCountry(meta.country.iso2)
-                }
-              }}
-              disableCountryGuess={true}
-              forceDialCode={true}
-              inputClassName="coss-input"
-              countrySelectorStyleProps={{
-                buttonClassName: "country-selector-button"
-              }}
+              onChange={(e) => setPhone(e.target.value)}
+              className="coss-input"
+              placeholder="Enter Your WhatsApp Number"
               aria-invalid={status === 'invalid'}
               aria-describedby="whatsapp-helper"
+              autoComplete="tel"
             />
             <p id="whatsapp-helper" className="text-sm text-slate-500">
               {helperMessage}

@@ -1,17 +1,14 @@
-import { useEffect, useRef, useState } from 'react'
-import { parsePhoneNumber, isValidPhoneNumber } from 'libphonenumber-js'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { parsePhoneNumber, isValidPhoneNumber, getCountries, getCountryCallingCode } from 'libphonenumber-js'
 import type { WhatsappSyncStatus } from '@saas/shared'
 
 interface UseWhatsappFieldOptions {
   endpoint?: string
-  defaultCountry?: string
 }
 
 interface WhatsappFieldApi {
   phone: string
   setPhone: (phone: string) => void
-  country: string
-  setCountry: (country: string) => void
   helperMessage: string
   status: WhatsappSyncStatus
   normalizedValue: string
@@ -19,10 +16,10 @@ interface WhatsappFieldApi {
 }
 
 const STORAGE_KEY = 'coss:whatsapp-number'
+const DEFAULT_COUNTRY_CODE = '+91' // India
 
 export function useWhatsappField(options?: UseWhatsappFieldOptions): WhatsappFieldApi {
-  const [phone, setPhone] = useState('')
-  const [country, setCountry] = useState(options?.defaultCountry || 'in')
+  const [rawPhone, setRawPhone] = useState(DEFAULT_COUNTRY_CODE)
   const [status, setStatus] = useState<WhatsappSyncStatus>('idle')
   const [helperMessage, setHelperMessage] = useState('Enter your WhatsApp number.')
   const [lastStoredAt, setLastStoredAt] = useState<string>()
@@ -30,12 +27,69 @@ export function useWhatsappField(options?: UseWhatsappFieldOptions): WhatsappFie
 
   const endpoint = options?.endpoint ?? import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
 
-  // Validate phone number using libphonenumber-js with selected country
-  const isValid = phone ? isValidPhoneNumber(phone, country.toUpperCase() as any) : false
-  const normalizedValue = phone && isValid ? parsePhoneNumber(phone, country.toUpperCase() as any)?.formatInternational() || phone : phone
+  // Smart phone number formatting
+  const phone = useMemo(() => {
+    let value = rawPhone.trim()
+    
+    // Remove + if it's the only character
+    if (value === '+') return ''
+    
+    // Ensure it starts with +
+    if (value && !value.startsWith('+')) {
+      value = '+' + value
+    }
+    
+    return value
+  }, [rawPhone])
+
+  // Detect country from phone number
+  const detectedCountry = useMemo(() => {
+    if (!phone || phone === '+') return 'IN'
+    
+    try {
+      // Try to parse to detect country
+      const parsed = parsePhoneNumber(phone)
+      return parsed?.country || 'IN'
+    } catch {
+      // If parsing fails, try to match country code
+      for (const country of getCountries()) {
+        try {
+          const countryCode = getCountryCallingCode(country)
+          if (phone.startsWith(`+${countryCode}`)) {
+            return country
+          }
+        } catch {
+          continue
+        }
+      }
+      return 'IN'
+    }
+  }, [phone])
+
+  // Validate phone number
+  const isValid = useMemo(() => {
+    if (!phone || phone === '+' || phone.length < 4) return false
+    
+    try {
+      return isValidPhoneNumber(phone)
+    } catch {
+      return false
+    }
+  }, [phone])
+
+  const normalizedValue = useMemo(() => {
+    if (!phone || !isValid) return phone
+    
+    try {
+      const parsed = parsePhoneNumber(phone)
+      return parsed?.formatInternational() || phone
+    } catch {
+      return phone
+    }
+  }, [phone, isValid])
 
   useEffect(() => {
-    if (!phone) {
+    if (!phone || phone === '+91' || phone === '+') {
       setStatus('idle')
       setHelperMessage('Enter your WhatsApp number.')
       return
@@ -43,21 +97,21 @@ export function useWhatsappField(options?: UseWhatsappFieldOptions): WhatsappFie
 
     if (!isValid) {
       setStatus('invalid')
-      setHelperMessage('Invalid phone number for selected country.')
+      setHelperMessage(`Invalid phone number for ${detectedCountry}.`)
       return
     }
 
     setStatus('valid')
     setHelperMessage('Looks good—syncing now.')
-  }, [phone, isValid])
+  }, [phone, isValid, detectedCountry])
 
   useEffect(() => {
     if (!isValid || !phone) {
       return
     }
 
-    // Get E.164 format for backend storage, validating against selected country
-    const parsedPhone = parsePhoneNumber(phone, country.toUpperCase() as any)
+    // Get E.164 format for backend storage
+    const parsedPhone = parsePhoneNumber(phone)
     const e164Number = parsedPhone?.number || phone
 
     if (e164Number === lastSyncedValueRef.current) {
@@ -97,13 +151,34 @@ export function useWhatsappField(options?: UseWhatsappFieldOptions): WhatsappFie
     sync()
 
     return () => controller.abort()
-  }, [endpoint, phone, isValid, country])
+  }, [endpoint, phone, isValid])
+
+  // Handle setting phone with automatic + prefix
+  const handleSetPhone = (value: string) => {
+    // User clearing the field
+    if (!value) {
+      setRawPhone(DEFAULT_COUNTRY_CODE)
+      return
+    }
+
+    // User typed +
+    if (value === '+') {
+      setRawPhone('+')
+      return
+    }
+
+    // Auto-add + if user starts typing digits
+    if (value && !value.startsWith('+')) {
+      setRawPhone('+' + value)
+      return
+    }
+
+    setRawPhone(value)
+  }
 
   return {
-    phone,
-    setPhone,
-    country,
-    setCountry,
+    phone: rawPhone,
+    setPhone: handleSetPhone,
     helperMessage,
     status,
     normalizedValue,
