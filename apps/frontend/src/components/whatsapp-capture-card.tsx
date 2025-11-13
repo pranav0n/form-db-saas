@@ -10,7 +10,7 @@ const statusCopy = {
 } as const
 
 export function WhatsappCaptureCard() {
-  const { fieldProps, helperMessage, status, normalizedValue, lastStoredAt } = useWhatsappField()
+  const { phone, setPhone, helperMessage, status, normalizedValue, lastStoredAt } = useWhatsappField()
   const copy = statusCopy[status]
 
   return (
@@ -46,11 +46,15 @@ export function WhatsappCaptureCard() {
               WhatsApp number
             </label>
             <input
-              {...fieldProps}
               id="whatsapp"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
               className="coss-input"
+              placeholder="Enter Your WhatsApp Number"
               aria-invalid={status === 'invalid'}
               aria-describedby="whatsapp-helper"
+              autoComplete="tel"
             />
             <p id="whatsapp-helper" className="text-sm text-slate-500">
               {helperMessage}
