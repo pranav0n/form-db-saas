@@ -48,6 +48,9 @@ importers:
       react-dom:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
+      react-international-phone:
+        specifier: ^4.6.0
+        version: 4.6.0(react@18.3.1)
       react-router-dom:
         specifier: ^6.20.0
         version: 6.30.2(react-dom@18.3.1)(react@18.3.1)
@@ -2129,6 +2132,14 @@ packages:
       loose-envify: 1.4.0
       react: 18.3.1
       scheduler: 0.23.2
+    dev: false
+
+  /react-international-phone@4.6.0(react@18.3.1):
+    resolution: {integrity: sha512-lzj5fLfACRKeaitggFIHWl6LM69aO2uivJbEVyVBjAe0+kkvZjToduqnK2/dm9Zu+l8XfVjd+Fn1ZAyG/t8XAg==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    dependencies:
+      react: 18.3.1
     dev: false
 
   /react-refresh@0.17.0:

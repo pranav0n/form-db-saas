@@ -40,54 +40,60 @@ pnpm build
 - **Monorepo**: Turborepo
 - **UI**: coss.com UI component library
 
-## Deployment (Railway)
+## Deployment (Render)
 
-Railway runs each folder as an independent service. Create two services—`frontend` and `backend`—within the same Railway project so they share networking and secrets.
+Render runs each folder as an independent web service. Create two services—`frontend` and `backend`—within the same Render account.
 
 ### Backend service
 
-1. In Railway, create a **Service → Empty Project** and select the repo.
-2. When prompted for the service root, choose `apps/backend`.
-3. Use the following commands:
-   - **Install**: `pnpm install --frozen-lockfile`
-   - **Build**: `pnpm --filter @saas/backend build`
-   - **Start**: `pnpm --filter @saas/backend start`
-4. Railway injects `PORT`; the Express server already respects it. Optionally add `.env` variables (e.g., `NODE_ENV=production`).
-5. Confirm the health endpoint at `/health` returns `{ "status": "ok" }`.
-6. **Copy the backend public URL** (e.g., `https://saas-backend-production.up.railway.app`)
+1. In Render, create a **New Web Service** and connect your repo.
+2. Configure the service:
+   - **Name**: `saas-backend` (or your choice)
+   - **Root Directory**: `apps/backend`
+   - **Environment**: `Node`
+   - **Build Command**: `pnpm install --no-frozen-lockfile && pnpm --filter @saas/backend build`
+   - **Start Command**: `pnpm --filter @saas/backend start`
+3. **Environment Variables** (add in Render dashboard):
+   - `NODE_ENV=production`
+   - Render auto-injects `PORT`; the Express server already respects it
+4. After deployment, confirm the health endpoint at `/health` returns `{ "status": "ok" }`.
+5. **Copy the backend public URL** (e.g., `https://saas-backend.onrender.com`)
 
 ### Frontend service
 
-1. Add another service in the same Railway project and pick the repo again, this time setting the root to `apps/frontend`.
-2. Configure commands:
-   - **Install**: `pnpm install --frozen-lockfile`
-   - **Build**: `pnpm --filter @saas/frontend build`
-   - **Start**: `pnpm --filter @saas/frontend preview -- --host 0.0.0.0 --port $PORT`
-3. Set the required environment variable pointing at the backend's Railway URL:
-   - `VITE_API_URL=https://<your-backend-service>.up.railway.app`
-4. Railway serves the built Vite app via the preview server; for purely static hosting you can swap the start command for `npx serve apps/frontend/dist --listen $PORT`.
-5. **Copy the frontend public URL** (e.g., `https://saas-frontend-production.up.railway.app`)
+1. Create another **New Web Service** in Render and connect the same repo.
+2. Configure the service:
+   - **Name**: `saas-frontend` (or your choice)
+   - **Root Directory**: `apps/frontend`
+   - **Environment**: `Node`
+   - **Build Command**: `pnpm install --no-frozen-lockfile && pnpm --filter @saas/frontend build`
+   - **Start Command**: `pnpm --filter @saas/frontend preview -- --host 0.0.0.0 --port $PORT`
+3. **Environment Variables** (REQUIRED - add in Render dashboard):
+   - `VITE_API_URL=https://<your-backend-service>.onrender.com`
+   - Replace `<your-backend-service>` with your actual backend URL from step 1
+4. **Important**: The `VITE_API_URL` must be set **before** the build runs, as Vite bakes it into the bundle at build time.
+5. **Copy the frontend public URL** (e.g., `https://saas-frontend.onrender.com`)
 
 ### End-to-End Testing
 
-Once both services are deployed on Railway:
+Once both services are deployed on Render:
 
 1. **Test Backend Health**
    ```bash
-   curl https://<your-backend-url>.up.railway.app/health
+   curl https://<your-backend-url>.onrender.com/health
    # Expected: {"status":"ok"}
    ```
 
 2. **Test WhatsApp Endpoint**
    ```bash
-   curl -X POST https://<your-backend-url>.up.railway.app/whatsapp \
+   curl -X POST https://<your-backend-url>.onrender.com/whatsapp \
      -H "Content-Type: application/json" \
      -d '{"number": "+14155552671", "source": "test"}'
    # Expected: {"status":"accepted","submission":{...}}
    ```
 
 3. **Test Frontend**
-   - Open `https://<your-frontend-url>.up.railway.app` in your browser
+   - Open `https://<your-frontend-url>.onrender.com` in your browser
    - Enter a WhatsApp number in the input field
    - Watch the real-time validation and sync status updates
    - Check browser DevTools Network tab to verify API calls to your backend
@@ -95,11 +101,11 @@ Once both services are deployed on Railway:
 4. **Verify End-to-End Flow**
    ```bash
    # After entering a number in the UI, check it was stored:
-   curl https://<your-backend-url>.up.railway.app/whatsapp/latest
+   curl https://<your-backend-url>.onrender.com/whatsapp/latest
    # Expected: {"status":"ok","submission":{"number":"+...", ...}}
    ```
 
 ### Local-to-hosted parity
 
 - Run everything locally with `pnpm --filter @saas/backend dev` and `pnpm --filter @saas/frontend dev`.
-- Use the same `VITE_API_URL` pattern locally to mimic production (e.g., `.env` file with the backend tunnel URL).
+- Create a `.env` file in `apps/frontend` with `VITE_API_URL=http://localhost:3001` to test the integration locally.

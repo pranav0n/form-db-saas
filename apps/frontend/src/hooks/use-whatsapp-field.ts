@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   formatWhatsappValue,
   validateWhatsappValue,
@@ -7,17 +7,14 @@ import {
 
 interface UseWhatsappFieldOptions {
   endpoint?: string
+  defaultCountry?: string
 }
 
 interface WhatsappFieldApi {
-  fieldProps: {
-    value: string
-    onChange: (event: ChangeEvent<HTMLInputElement>) => void
-    name: string
-    inputMode: 'tel'
-    autoComplete: 'tel'
-    placeholder: string
-  }
+  phone: string
+  setPhone: (phone: string) => void
+  country: string
+  setCountry: (country: string) => void
   helperMessage: string
   status: WhatsappSyncStatus
   normalizedValue: string
@@ -27,7 +24,8 @@ interface WhatsappFieldApi {
 const STORAGE_KEY = 'coss:whatsapp-number'
 
 export function useWhatsappField(options?: UseWhatsappFieldOptions): WhatsappFieldApi {
-  const [rawValue, setRawValue] = useState('')
+  const [phone, setPhone] = useState('')
+  const [country, setCountry] = useState(options?.defaultCountry || 'in')
   const [status, setStatus] = useState<WhatsappSyncStatus>('idle')
   const [helperMessage, setHelperMessage] = useState('Enter your WhatsApp number.')
   const [lastStoredAt, setLastStoredAt] = useState<string>()
@@ -37,11 +35,11 @@ export function useWhatsappField(options?: UseWhatsappFieldOptions): WhatsappFie
     return options?.endpoint ?? import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
   }, [options?.endpoint])
 
-  const validation = useMemo(() => validateWhatsappValue(rawValue), [rawValue])
-  const normalizedValue = useMemo(() => formatWhatsappValue(rawValue), [rawValue])
+  const validation = useMemo(() => validateWhatsappValue(phone), [phone])
+  const normalizedValue = useMemo(() => formatWhatsappValue(phone), [phone])
 
   useEffect(() => {
-    if (!rawValue) {
+    if (!phone) {
       setStatus('idle')
       setHelperMessage('Enter your WhatsApp number.')
       return
@@ -55,7 +53,7 @@ export function useWhatsappField(options?: UseWhatsappFieldOptions): WhatsappFie
 
     setStatus('valid')
     setHelperMessage('Looks good—syncing now.')
-  }, [rawValue, validation.isValid, validation.issue])
+  }, [phone, validation.isValid, validation.issue])
 
   useEffect(() => {
     if (!validation.isValid || !validation.formattedValue) {
@@ -101,19 +99,11 @@ export function useWhatsappField(options?: UseWhatsappFieldOptions): WhatsappFie
     return () => controller.abort()
   }, [endpoint, validation.formattedValue, validation.isValid])
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setRawValue(event.target.value)
-  }
-
   return {
-    fieldProps: {
-      value: rawValue,
-      onChange: handleChange,
-      name: 'whatsapp',
-      inputMode: 'tel',
-      autoComplete: 'tel',
-      placeholder: '+1 415 555 2671'
-    },
+    phone,
+    setPhone,
+    country,
+    setCountry,
     helperMessage,
     status,
     normalizedValue,

@@ -1,3 +1,5 @@
+import { PhoneInput } from 'react-international-phone'
+import 'react-international-phone/style.css'
 import { useWhatsappField } from '../hooks/use-whatsapp-field'
 
 const statusCopy = {
@@ -10,7 +12,7 @@ const statusCopy = {
 } as const
 
 export function WhatsappCaptureCard() {
-  const { fieldProps, helperMessage, status, normalizedValue, lastStoredAt } = useWhatsappField()
+  const { phone, setPhone, country, setCountry, helperMessage, status, normalizedValue, lastStoredAt } = useWhatsappField({ defaultCountry: 'in' })
   const copy = statusCopy[status]
 
   return (
@@ -45,10 +47,19 @@ export function WhatsappCaptureCard() {
             <label htmlFor="whatsapp" className="text-sm font-semibold uppercase tracking-wider text-slate-500">
               WhatsApp number
             </label>
-            <input
-              {...fieldProps}
-              id="whatsapp"
-              className="coss-input"
+            <PhoneInput
+              defaultCountry="in"
+              value={phone}
+              onChange={(phone, meta) => {
+                setPhone(phone)
+                if (meta.country) {
+                  setCountry(meta.country.iso2)
+                }
+              }}
+              inputClassName="coss-input"
+              countrySelectorStyleProps={{
+                buttonClassName: "country-selector-button"
+              }}
               aria-invalid={status === 'invalid'}
               aria-describedby="whatsapp-helper"
             />
