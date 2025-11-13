@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import { Router, type Request, type Response } from 'express'
 import type { WhatsappSubmission } from '@saas/shared'
 import { validateWhatsappValue } from '@saas/shared'
 
@@ -6,7 +6,7 @@ const whatsappRouter = Router()
 const recentSubmissions: WhatsappSubmission[] = []
 const MAX_SUBMISSIONS = 100
 
-whatsappRouter.post('/', (req, res) => {
+whatsappRouter.post('/', (req: Request, res: Response) => {
   const candidate = typeof req.body?.number === 'string' ? req.body.number : ''
   const validation = validateWhatsappValue(candidate)
 
@@ -34,7 +34,7 @@ whatsappRouter.post('/', (req, res) => {
   })
 })
 
-whatsappRouter.get('/latest', (_req, res) => {
+whatsappRouter.get('/latest', (_req: Request, res: Response) => {
   const latest = recentSubmissions[recentSubmissions.length - 1]
 
   if (!latest) {
