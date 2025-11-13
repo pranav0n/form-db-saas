@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm install --frozen-lockfile && pnpm --filter @saas/frontend build",
+  "installCommand": false,
+  "outputDirectory": "apps/frontend/dist",
+  "framework": "vite",
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  }
+}
+
