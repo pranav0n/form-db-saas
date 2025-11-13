@@ -9,5 +9,14 @@ export default defineConfig({
       '@saas/shared': path.resolve(__dirname, '../../packages/shared/src'),
     },
   },
+  preview: {
+    host: '0.0.0.0',
+    port: 5173,
+    strictPort: false,
+  },
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+  },
 })
 
