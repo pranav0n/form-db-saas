@@ -2,3 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    @apply min-h-screen bg-coss-night font-coss text-coss-ink antialiased;
+  }
+}
+
+@layer components {
+  .coss-input {
+    @apply w-full rounded-3xl border-2 border-coss-cloud/30 bg-white/80 px-6 py-4 text-lg font-semibold text-coss-ink shadow-inner outline-none transition-all duration-150 ease-out placeholder:text-slate-400 focus:border-coss-mint focus:bg-white focus:shadow-[0_0_0_3px_rgba(46,232,166,0.25)];
+  }
+}
+
