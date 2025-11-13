@@ -13,6 +13,11 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
     strictPort: false,
+    allowedHosts: [
+      'saasfrontend-production-4faf.up.railway.app',
+      '.up.railway.app',
+      'localhost',
+    ],
   },
   server: {
     host: '0.0.0.0',
