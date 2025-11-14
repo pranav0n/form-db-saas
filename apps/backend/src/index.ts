@@ -11,6 +11,18 @@ const PORT = process.env.PORT || 3001
 app.use(cors())
 app.use(express.json())
 
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'SaaS Backend API',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      whatsapp: '/whatsapp',
+      latest: '/whatsapp/latest'
+    }
+  })
+})
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' })
 })
